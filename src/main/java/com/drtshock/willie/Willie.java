@@ -15,6 +15,7 @@ import org.pircbotx.exception.NickAlreadyInUseException;
 import com.drtshock.willie.command.Command;
 import com.drtshock.willie.command.CommandManager;
 import com.drtshock.willie.command.admin.AdminCommandHandler;
+import com.drtshock.willie.command.admin.CommandsCommandHandler;
 import com.drtshock.willie.command.admin.PrefixCommandHandler;
 import com.drtshock.willie.command.admin.ReloadCommandHandler;
 import com.drtshock.willie.command.admin.SaveCommandHandler;
@@ -54,9 +55,11 @@ public class Willie extends PircBotX {
     public static final JsonParser parser = new JsonParser();
     public static String GIT_AUTH;
     private static String CONFIG_FILE = "config.yml";
+    private static String COMMAND_FILE = "commands.yml";
     public JenkinsServer jenkins;
     public CommandManager commandManager;
     private WillieConfig willieConfig;
+    private WillieCommands willieCommands;
 
     public static Willie getInstance() {
         return instance;
@@ -101,6 +104,7 @@ public class Willie extends PircBotX {
         this.commandManager.registerCommand(new Command("disagree", "disagree!", new AgreeDisagreeCommandHandler(false)));
 
         this.commandManager.registerCommand(new Command("join", "<channel> - Joins a channel", new JoinCommandHandler(), true));
+        this.commandManager.registerCommand(new Command("setcmd", "<command> <output> - sets output for a command.", new CommandsCommandHandler(), true));
         this.commandManager.registerCommand(new Command("shutdown", "shuts the bot down", new ShutdownCommandHandler(), true));
         this.commandManager.registerCommand(new Command("leave", "<channel> - Leaves a channel", new LeaveCommandHandler(), true));
         this.commandManager.registerCommand(new Command("reload", "Reloads willie", new ReloadCommandHandler(), true));
@@ -157,6 +161,7 @@ public class Willie extends PircBotX {
     public void reload() {
         logger.info("Reloading...");
         willieConfig = WillieConfig.loadFromFile(CONFIG_FILE);
+        willieCommands = WillieCommands.loadFromFile(COMMAND_FILE);
 
         // Update command prefix
         commandManager.setCommandPrefix(willieConfig.getCommandPrefix());
@@ -209,6 +214,10 @@ public class Willie extends PircBotX {
 
     public WillieConfig getConfig() {
         return willieConfig;
+    }
+    
+    public WillieCommands getCommands() {
+        return willieCommands;
     }
 
     public static void main(String[] args) {
